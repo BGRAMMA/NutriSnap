@@ -1,6 +1,5 @@
 package com.bgramma.nutrisnap.ui.camera
 
-import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.LifecycleCameraController
@@ -26,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,6 +38,7 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
     // observing
     val isGranted by viewModel.isCameraGranted
     val isCapturing by viewModel.isCapturing
+    val aiResult by viewModel.aiResult
 
     // 화면 전환 애니메이션
     val alpha by animateFloatAsState(
@@ -96,6 +95,22 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
                     color = Color.White,
                     modifier = Modifier.padding(16.dp).fillMaxWidth()
                 )
+            }
+
+            if ( aiResult != null ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = aiResult!!,
+                        color = Color.White,
+                        modifier = Modifier.padding(20.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             FloatingActionButton(
