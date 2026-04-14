@@ -10,16 +10,19 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.LifecycleCameraController
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bgramma.nutrisnap.BuildConfig
+import com.bgramma.nutrisnap.data.FoodEntry
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.SimpleDateFormat
 
 class CameraViewModel : ViewModel() {
 
@@ -31,13 +34,16 @@ class CameraViewModel : ViewModel() {
         _isCameraGranted.value = isGranted
     }
 
+
     // 촬영 중 상태 관리
     private val _isCapturing = mutableStateOf(false)
     val isCapturing: State<Boolean> = _isCapturing
 
+
     // 촬영된 파일 주소 저장
     private val _capturedFileUri = mutableStateOf<Uri?>(null)
     val capturedFileUri: State<Uri?> = _capturedFileUri
+
 
     // gemini 모델 설정
     private val generativeModel = GenerativeModel(
@@ -48,6 +54,9 @@ class CameraViewModel : ViewModel() {
     // gemini 결과 상태 관리
     private val _aiResult = mutableStateOf<String?>(null)
     val aiResult : State<String?> = _aiResult
+
+    private val _foodList = mutableStateListOf<FoodEntry>()
+    val foodList: List<FoodEntry> = _foodList
 
     // 사진 촬영
     fun takePhoto(
@@ -74,6 +83,8 @@ class CameraViewModel : ViewModel() {
                         _capturedFileUri.value = finalUri
 
                         Log.d("Camera", "파일 저장 성공 -> $finalUri")
+
+                        analyzeImage(context, finalUri)
                     }
                 }
 
@@ -135,6 +146,11 @@ class CameraViewModel : ViewModel() {
                         _aiResult.value = null
                         return@launch
                     }
+
+                    val currentTime = SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+                    val newEntry = FoodEntry(foodName, calories, currentTime)
+
+                    _foodList.add(0, newEntry)
 
                     _aiResult.value = """
                         음식 : $foodName

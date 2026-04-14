@@ -9,9 +9,13 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,6 +45,7 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
     val isGranted by viewModel.isCameraGranted
     val isCapturing by viewModel.isCapturing
     val aiResult by viewModel.aiResult
+    val foodList = viewModel.foodList
 
     // 화면 전환 애니메이션
     val alpha by animateFloatAsState(
@@ -92,7 +97,7 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
 
             // 상단 안내 문구
             Surface(
-                modifier = Modifier.fillMaxSize().align(Alignment.TopCenter),
+                modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
                 color = Color.Black.copy(alpha = 0.5f)
             ) {
                 Text(
@@ -101,6 +106,27 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
                     modifier = Modifier.padding(16.dp).fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 100.dp)
+                    .background(if ( foodList.isNotEmpty()) Color.Black.copy(alpha = 0.4f) else Color.Transparent)
+            ) {
+                items(foodList) { entry ->
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "${entry.time} - ${entry.name} (${entry.calories}kcal)",
+                            color = Color.White
+                        )
+                    }
+                }
             }
 
             CameraResultView(
