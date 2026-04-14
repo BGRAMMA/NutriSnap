@@ -1,5 +1,6 @@
 package com.bgramma.nutrisnap.ui.camera
 
+import android.R
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.LifecycleCameraController
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.FloatingActionButton
@@ -75,8 +77,11 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
         modifier = Modifier.fillMaxSize()
     ) {
         if ( isGranted ) {
+
+            // 미리보기
             CameraPreview(controller = cameraController)
 
+            // 촬영 이펙트
             if ( alpha > 0f ) {
                 Box(
                     modifier = Modifier
@@ -85,44 +90,29 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
                 )
             }
 
+            // 상단 안내 문구
             Surface(
-                modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
+                modifier = Modifier.fillMaxSize().align(Alignment.TopCenter),
                 color = Color.Black.copy(alpha = 0.5f)
             ) {
                 Text(
-                    textAlign = TextAlign.Center,
                     text = "음식을 화면 중앙에 맞춰주세요.",
                     color = Color.White,
-                    modifier = Modifier.padding(16.dp).fillMaxWidth()
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
             }
 
-            if ( aiResult != null ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = aiResult!!,
-                        color = Color.White,
-                        modifier = Modifier.padding(20.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            CameraResultView(
+                aiResult,
+                modifier = Modifier.align(Alignment.Center)
+            )
 
-            FloatingActionButton(
-                onClick = {},
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp),
-                shape = CircleShape,
-                containerColor = Color.White,
-            ) {
-                Icon(Icons.Default.PhotoCamera, contentDescription = "촬영")
-            }
+            CameraCaptureButton(
+                { viewModel.takePhoto(cameraController, context) },
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+
         } else {
             Text(
                 text = "카메라 권한이 거부되었습니다.",
@@ -130,5 +120,43 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
             )
         }
     }
+}
 
+// 분석 결과
+@Composable
+fun CameraResultView(
+    aiResult : String?,
+    modifier : Modifier = Modifier
+) {
+    if ( aiResult != null ) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(
+                    Color.Black.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(12.dp)
+                    ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = aiResult,
+                color = Color.White,
+                modifier = Modifier.padding(20.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+// 촬영 버튼
+@Composable
+fun CameraCaptureButton(onClick : () -> Unit, modifier: Modifier = Modifier) {
+    FloatingActionButton(
+        onClick = onClick,
+        modifier = modifier.padding(bottom = 32.dp),
+        shape = CircleShape,
+        containerColor = Color.White
+    ) {
+        Icon(Icons.Default.PhotoCamera, contentDescription = "촬영")
+    }
 }
