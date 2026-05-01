@@ -26,6 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
@@ -45,7 +47,7 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
     val isGranted by viewModel.isCameraGranted
     val isCapturing by viewModel.isCapturing
     val aiResult by viewModel.aiResult
-    val foodList = viewModel.foodList
+    val foodList by viewModel.foodList.collectAsState(emptyList())
 
     // 화면 전환 애니메이션
     val alpha by animateFloatAsState(
@@ -116,7 +118,7 @@ fun CameraScreen(viewModel : CameraViewModel = viewModel()) {
                     .padding(bottom = 100.dp)
                     .background(if ( foodList.isNotEmpty()) Color.Black.copy(alpha = 0.4f) else Color.Transparent)
             ) {
-                items(foodList) { entry ->
+                items(items = foodList) { entry ->
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
